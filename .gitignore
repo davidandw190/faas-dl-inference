@@ -1,0 +1,8 @@
+template
+build
+.secrets
+.venv
+
+functions/*/model/
+functions/*/tokenizer/
+*.onnx
