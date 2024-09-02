@@ -12,10 +12,6 @@ functions:
       exec_timeout: '600s'
       read_timeout: 120
       write_timeout: 120
-    labels:
-      com.openfaas.scale.min: "1"
-      com.openfaas.scale.max: "10"
-      com.openfaas.scale.factor: "20%"
     health_check:
       initial_delay_seconds: 120
       period_seconds: 3
