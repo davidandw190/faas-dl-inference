@@ -6,15 +6,13 @@ ARG WATCHDOG_MODE="http"
 FROM --platform=${TARGETPLATFORM:-linux/amd64} ghcr.io/openfaas/of-watchdog:0.10.5 as watchdog
 FROM --platform=${TARGETPLATFORM:-linux/amd64} python:${PYTHON_VERSION}-slim-buster
 
-WORKDIR /install
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-ARG FUNCTION_DIR
 WORKDIR ${FUNCTION_DIR}
 
-COPY --from=builder /usr/local /usr/local
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    find /usr/local/lib/python* -name '__pycache__' -type d -exec rm -rf {} + || true
+
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
@@ -23,8 +21,7 @@ COPY classifier_int8.onnx .
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libgomp1 && \
-    rm -rf /var/lib/apt/lists/* && \
-    find /usr/local/lib/python* -name '__pycache__' -type d -exec rm -rf {} + || true
+    rm -rf /var/lib/apt/lists/*
 
 ENV fprocess="python3 handler.py" \
     cgi_headers="true" \
