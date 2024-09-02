@@ -1,67 +1,66 @@
 import json
-import onnxruntime as ort
-import numpy as np
-from transformers import AutoTokenizer
 import sys
 import logging
+from typing import Dict, List, Any
 
-logging.basicConfig(level=logging.INFO)
+import numpy as np
+import onnxruntime as ort
+from transformers import AutoTokenizer
 
-model_path = "classifier_int8.onnx"
-tokenizer = AutoTokenizer.from_pretrained("microsoft/xtremedistil-l6-h256-uncased")
-session = ort.InferenceSession(model_path)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-emotions = ['sadness', 'joy', 'love', 'anger', 'fear', 'surprise']
+MODEL_PATH = "classifier_int8.onnx"
+TOKENIZER_NAME = "microsoft/xtremedistil-l6-h256-uncased"
+EMOTIONS = ['sadness', 'joy', 'love', 'anger', 'fear', 'surprise']
+MAX_LENGTH = 128
 
-def handle(req):
-    logging.info(f"Received request: {req}")
+tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_NAME, use_fast=True)
+session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
+
+def softmax(x: np.ndarray) -> np.ndarray:
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=-1, keepdims=True)
+
+def process_text(text: str) -> Dict[str, List[Dict[str, Any]]]:
+    inputs = tokenizer(text, return_tensors="np", padding="max_length", truncation=True, max_length=MAX_LENGTH)
+    
+    ort_inputs = {
+        "input_ids": inputs["input_ids"],
+        "attention_mask": inputs["attention_mask"],
+        "token_type_ids": inputs["token_type_ids"]
+    }
+    
+    logits = session.run(None, ort_inputs)[0]
+    probabilities = softmax(logits)[0]
+    
+    top_emotions = np.argsort(probabilities)[-3:][::-1]
+    
+    return {
+        "result": [
+            {"emotion": EMOTIONS[i], "probability": float(probabilities[i])}
+            for i in top_emotions
+        ]
+    }
+
+def handle(req: str) -> str:
     try:
         input_data = json.loads(req)
         text = input_data.get("text", "")
         
-        logging.info(f"Processed input text: {text}")
-        
         if not text:
             return json.dumps({"error": "No text provided"})
         
-        inputs = tokenizer(text, return_tensors="np", padding="max_length", truncation=True, max_length=128)
-        logging.info("Tokenization completed")
-        
-        ort_inputs = {
-            "input_ids": inputs["input_ids"],
-            "attention_mask": inputs["attention_mask"],
-            "token_type_ids": inputs["token_type_ids"]
-        }
-        logging.info("Running ONNX inference")
-        ort_outputs = session.run(None, ort_inputs)
-        
-        logits = ort_outputs[0]
-        probabilities = softmax(logits[0])
-        
-        top_emotions = np.argsort(probabilities)[-3:][::-1]
-        
-        result = [
-            {"emotion": emotions[i], "probability": float(probabilities[i])}
-            for i in top_emotions
-        ]
-        
-        logging.info(f"Processed result: {result}")
-        return json.dumps({"result": result})
+        result = process_text(text)
+        return json.dumps(result)
     
     except json.JSONDecodeError as e:
-        logging.error(f"JSON decode error: {str(e)}")
         return json.dumps({"error": f"Invalid JSON input: {str(e)}"})
     except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}")
-        logging.error(f"Exception type: {type(e).__name__}")
-        logging.error(f"Exception traceback: {sys.exc_info()[2]}")
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         return json.dumps({"error": f"An unexpected error occurred: {str(e)}"})
 
-def softmax(x):
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum()
-
 if __name__ == "__main__":
-    st = sys.stdin.read()
-    ret = handle(st)
-    print(ret, flush=True)
+    for line in sys.stdin:
+        ret = handle(line)
+        print(ret, flush=True)
