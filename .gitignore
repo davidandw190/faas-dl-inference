@@ -6,3 +6,5 @@ build
 functions/*/model/
 functions/*/tokenizer/
 *.onnx
+__pycache__
+functions/*/*.jpg
