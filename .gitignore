@@ -6,5 +6,7 @@ build
 functions/*/model/
 functions/*/tokenizer/
 *.onnx
+*.prototxt
+*.caffemodel
 __pycache__
 functions/*/*.jpg

@@ -3,63 +3,77 @@ provider:
   name: openfaas
   gateway: http://127.0.0.1:8080
 functions:
-  sentiment-analysis:
+  # sentiment-analysis:
+  #   lang: dockerfile
+  #   handler: ./functions/sentiment-analysis
+  #   image: davidandw190/sentiment-analysis:v1
+  #   environment:
+  #     write_debug: true
+  #     exec_timeout: '600s'
+  #     read_timeout: 120
+  #     write_timeout: 120
+  #   health_check:
+  #     initial_delay_seconds: 120
+  #     period_seconds: 3
+  #     failure_threshold: 5
+  # multi-label-sentiment-analysis:
+  #   lang: dockerfile
+  #   handler: ./functions/multi-label-sentiment-analysis
+  #   image: davidandw190/multi-label-sentiment-analysis:v1
+  #   environment:
+  #     write_debug: true
+  #     exec_timeout: '600s'
+  #     read_timeout: 120
+  #     write_timeout: 120
+  #   health_check:
+  #     initial_delay_seconds: 120
+  #     period_seconds: 3
+  #     failure_threshold: 5
+  # text-classification:
+  #   lang: dockerfile
+  #   handler: ./functions/text-classification
+  #   image: davidandw190/text-classification:v1
+  #   environment:
+  #     write_debug: true
+  #     exec_timeout: '600s'
+  #     read_timeout: 120
+  #     write_timeout: 120
+  #   health_check:
+  #     initial_delay_seconds: 120
+  #     period_seconds: 3
+  #     failure_threshold: 5
+  # face-detection:
+  #   lang: dockerfile
+  #   handler: ./functions/face-detection
+  #   image: davidandw190/face-detection:v1
+  #   environment:
+  #     write_debug: true
+  #     exec_timeout: '600s'
+  #     read_timeout: 120
+  #     write_timeout: 120
+  #     RAW_BODY: true
+  #   health_check:
+  #     initial_delay_seconds: 120
+  #     period_seconds: 3
+  #     failure_threshold: 5
+  # face-emotion-detection:
+  #   lang: dockerfile
+  #   handler: ./functions/face-emotion-detection
+  #   image: davidandw190/face-emotion-detection:v1
+  #   environment:
+  #     write_debug: true
+  #     exec_timeout: '600s'
+  #     read_timeout: 120
+  #     write_timeout: 120
+  #     RAW_BODY: true
+  #   health_check:
+  #     initial_delay_seconds: 120
+  #     period_seconds: 3
+  #     failure_threshold: 5
+  face-gender-detection:
     lang: dockerfile
-    handler: ./functions/sentiment-analysis
-    image: davidandw190/sentiment-analysis:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  multi-label-sentiment-analysis:
-    lang: dockerfile
-    handler: ./functions/multi-label-sentiment-analysis
-    image: davidandw190/multi-label-sentiment-analysis:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  text-classification:
-    lang: dockerfile
-    handler: ./functions/text-classification
-    image: davidandw190/text-classification:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  face-detection:
-    lang: dockerfile
-    handler: ./functions/face-detection
-    image: davidandw190/face-detection:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-      RAW_BODY: true
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  face-emotion-detection:
-    lang: dockerfile
-    handler: ./functions/face-emotion-detection
-    image: davidandw190/face-emotion-detection:v1
+    handler: ./functions/face-gender-detection
+    image: davidandw190/face-gender-detection:v1
     environment:
       write_debug: true
       exec_timeout: '600s'
