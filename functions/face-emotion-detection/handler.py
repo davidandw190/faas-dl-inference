@@ -43,12 +43,12 @@ def predict_emotion(image_data: bytes) -> Dict[str, Any]:
     
     emotion_index = np.argmax(probabilities)
     emotion = emotion_table[emotion_index]
-    confidence = float(probabilities[emotion_index])
+    confidence = round(float(probabilities[emotion_index]), 2)
     
     return {
-        "emotion": emotion,
-        "confidence": confidence,
-        "probabilities": {emotion_table[i]: float(prob) for i, prob in enumerate(probabilities)}
+        "predicted_emotion": emotion,
+        "emotion_confidence": confidence,
+        "emotion_probabilities": {emotion_table[i]: round(float(prob), 3) for i, prob in enumerate(probabilities)}
     }
 
 def process_faces(faces: list) -> Dict[str, Any]:
@@ -68,8 +68,7 @@ def process_faces(faces: list) -> Dict[str, Any]:
             results.append({
                 "face_id": face_id,
                 "emotion_result": emotion_result,
-                "confidence": face["confidence"],
-                "bounding_box": face["bounding_box"]
+                "face_detection_confidence": round(face["confidence"], 2)
             })
         except Exception as e:
             logger.error(f"Error processing face {face_id}: {str(e)}")

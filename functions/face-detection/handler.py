@@ -60,7 +60,7 @@ def predict(width, height, confidences, boxes, prob_threshold, iou_threshold=0.3
     return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
 
 
-def faceDetector(orig_image, threshold=0.7):
+def faceDetector(orig_image, threshold=0.5):
     if face_detector is None:
         logger.error("Face detection model not initialized")
         return [], [], []
@@ -119,7 +119,7 @@ def process_image(image_data: bytes) -> Dict[str, Any]:
                 
                 results.append({
                     "face_id": i + 1,
-                    "confidence": float(probs[i]),
+                    "confidence": round(float(probs[i]), 3),
                     "bounding_box": box.tolist(),
                     "face_image": face_bytes.tobytes()
                 })

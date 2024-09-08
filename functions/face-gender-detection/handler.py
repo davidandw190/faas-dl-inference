@@ -33,8 +33,8 @@ def predict_gender(image_data: bytes) -> Dict[str, Any]:
     output = net.forward()
     gender_index = output[0].argmax()
     gender = gender_labels[gender_index]
-    confidence = float(output[0][gender_index])
-    return {"gender": gender, "confidence": confidence}
+    confidence = round(float(output[0][gender_index]), 2)
+    return {"predicted_gender": gender, "gender_confidence": confidence}
 
 def process_faces(faces: list) -> Dict[str, Any]:
     results = []
@@ -53,8 +53,7 @@ def process_faces(faces: list) -> Dict[str, Any]:
             results.append({
                 "face_id": face_id,
                 "gender_result": gender_result,
-                "detection_confidence": face["confidence"],
-                "bounding_box": face["bounding_box"]
+                "face_detection_confidence": round(face["confidence"], 3)
             })
         except Exception as e:
             logger.error(f"Error processing face {face_id}: {str(e)}")
