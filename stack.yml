@@ -84,3 +84,22 @@ functions:
       initial_delay_seconds: 120
       period_seconds: 3
       failure_threshold: 5
+  face-analysis-orchestrator:
+    lang: dockerfile
+    handler: ./workflows/face-analysis-orchestrator
+    image: davidandw190/face-analysis-orchestrator:v1
+    environment:
+      write_debug: true
+      exec_timeout: '900s'
+      read_timeout: 180
+      write_timeout: 180
+      RAW_BODY: true
+      GATEWAY_URL: "http://gateway.openfaas:8080"
+      FACE_DETECTION_FUNCTION: "face-detection"
+      GENDER_DETECTION_FUNCTION: "face-gender-detection"
+      EMOTION_DETECTION_FUNCTION: "face-emotion-detection"
+      RESULT_COMBINER_FUNCTION: "result-combiner"
+    health_check:
+      initial_delay_seconds: 120
+      period_seconds: 3
+      failure_threshold: 5

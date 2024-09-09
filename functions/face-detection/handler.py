@@ -91,17 +91,17 @@ def faceDetector(orig_image, threshold=0.5):
         logger.error(f"Error during face detection: {str(e)}")
         return [], [], []
 
-def process_image(image_data: bytes) -> Dict[str, Any]:
-    if not image_data:
-        logger.error("Received empty image data")
-        return {"error": "Empty image data"}
+def process_image(image_data: Dict[str, Any]) -> Dict[str, Any]:
+    if not image_data or "image" not in image_data:
+        logger.error("Received empty or invalid image data")
+        return {"error": "Empty or invalid image data"}
 
-    logger.info(f"process_image input data length: {len(image_data)}")
+    image_hex = image_data["image"]
+    image_shape = image_data["image_shape"]
+    logger.info(f"process_image input data length: {len(image_hex)}")
     
     try:
-        nparr = np.frombuffer(image_data, np.uint8)
-        logger.info(f"Numpy array shape: {nparr.shape}")
-        
+        nparr = np.frombuffer(bytes.fromhex(image_hex), np.uint8)
         orig_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if orig_image is None:
             logger.error("Failed to decode image with OpenCV")
@@ -121,7 +121,7 @@ def process_image(image_data: bytes) -> Dict[str, Any]:
                     "face_id": i + 1,
                     "confidence": round(float(probs[i]), 3),
                     "bounding_box": box.tolist(),
-                    "face_image": face_bytes.tobytes()
+                    "face_image": face_bytes.tobytes().hex()
                 })
             except Exception as e:
                 logger.error(f"Error processing face {i+1}: {str(e)}")
@@ -137,39 +137,26 @@ def process_image(image_data: bytes) -> Dict[str, Any]:
 def handle(req: bytes) -> bytes:
     try:
         logger.info("Received request for face detection")
-        logger.info(f"Input data length: {len(req)}")
-
+        
         if not req:
             return json.dumps({"error": "Empty request"}).encode('utf-8')
-
-        result = process_image(req)
         
-        if "error" in result:
-            return json.dumps(result).encode('utf-8')
+        input_data = json.loads(req.decode('utf-8'))
+        result = process_image(input_data)
         
-        serialized_result = {
-            "num_faces_detected": result["num_faces_detected"],
-            "faces": [
-                {
-                    "face_id": face["face_id"],
-                    "confidence": face["confidence"],
-                    "bounding_box": face["bounding_box"],
-                    "face_image": face["face_image"]
-                }
-                for face in result["faces"]
-            ]
-        }
-        
-        return json.dumps(serialized_result, default=lambda x: x.hex() if isinstance(x, bytes) else x).encode('utf-8')
+        return json.dumps(result).encode('utf-8')
     
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON input")
+        return json.dumps({"error": "Invalid JSON input"}).encode('utf-8')
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         return json.dumps({"error": f"An unexpected error occurred: {str(e)}"}).encode('utf-8')
 
 if __name__ == "__main__":
     try:
-        image_data = sys.stdin.buffer.read()
-        ret = handle(image_data)
+        input_data = sys.stdin.buffer.read()
+        ret = handle(input_data)
         sys.stdout.buffer.write(ret)
         sys.stdout.buffer.flush()
     except Exception as e:
