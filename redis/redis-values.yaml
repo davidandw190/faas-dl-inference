@@ -1,0 +1,23 @@
+architecture: standalone
+auth:
+  enabled: false
+master:
+  persistence:
+    enabled: true
+    size: 1Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+replica:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

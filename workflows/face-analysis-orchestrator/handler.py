@@ -5,7 +5,17 @@ from typing import Dict, Any
 import requests
 import cv2
 import numpy as np
+import redis
+import os
+import hashlib
 from prometheus_client import Counter, Histogram
+
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-master.openfaas.svc.cluster.local")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_DB = int(os.getenv("REDIS_DB", 0))
+REDIS_TTL = int(os.getenv("REDIS_TTL", 300))
+
+redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -52,6 +62,12 @@ def process_image(image_data: bytes) -> Dict[str, Any]:
 def face_analysis_workflow(image_data: bytes) -> Dict[str, Any]:
     logger.info(f"face_analysis_workflow received data of length: {len(image_data)} bytes")
     
+    cache_key = generate_cache_key(image_data)
+    cached_result = get_cached_result(cache_key)
+    if cached_result:
+        logger.info("Returning cached result")
+        return cached_result
+    
     processed_image = process_image(image_data)
     if "error" in processed_image:
         return processed_image
@@ -86,9 +102,23 @@ def face_analysis_workflow(image_data: bytes) -> Dict[str, Any]:
             "face_image": next(face["face_image"] for face in face_detection_result["faces"] if face["face_id"] == face_id)
         }
         combined_results["faces"].append(face_info)
+        
+    set_cached_result(cache_key, combined_results)    
     
     logger.info("Face analysis workflow completed successfully")
     return combined_results
+
+def generate_cache_key(image_data: bytes) -> str:
+    return hashlib.md5(image_data).hexdigest()
+
+def get_cached_result(cache_key: str) -> Dict[str, Any] | None:
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return json.loads(cached_data)
+    return None
+
+def set_cached_result(cache_key: str, result: Dict[str, Any]):
+    redis_client.setex(cache_key, REDIS_TTL, json.dumps(result))
 
 def handle(req: bytes) -> bytes:
     try:
