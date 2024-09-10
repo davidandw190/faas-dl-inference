@@ -1,67 +1,7 @@
 import json
-import logging
 import sys
-from typing import Dict, Any
-
-import cv2
-import numpy as np
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-MODEL_PATH = "gender_googlenet.caffemodel"
-CONFIG_PATH = "gender_googlenet.prototxt"
-
-try:
-    net = cv2.dnn.readNet(MODEL_PATH, CONFIG_PATH)
-    logger.info("Gender classification model loaded successfully.")
-except Exception as e:
-    logger.error(f"Error loading the gender classification model: {str(e)}")
-    raise
-
-gender_labels = ['Male', 'Female']
-
-def preprocess_image(image_data: bytes) -> np.ndarray:
-    nparr = np.frombuffer(image_data, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    blob = cv2.dnn.blobFromImage(image, 1.0, (224, 224), (104, 117, 123), swapRB=False)
-    return blob
-
-def predict_gender(image_data: bytes) -> Dict[str, Any]:
-    blob = preprocess_image(image_data)
-    net.setInput(blob)
-    output = net.forward()
-    gender_index = output[0].argmax()
-    gender = gender_labels[gender_index]
-    confidence = round(float(output[0][gender_index]), 2)
-    return {"predicted_gender": gender, "gender_confidence": confidence}
-
-def process_faces(faces: list) -> Dict[str, Any]:
-    results = []
-    for face in faces:
-        try:
-            face_id = face["face_id"]
-            face_image = face["face_image"]
-            
-            if not face_image:
-                logger.warning(f"No image data for face_id: {face_id}")
-                continue
-            
-            face_image_bytes = bytes.fromhex(face_image)
-            gender_result = predict_gender(face_image_bytes)
-            
-            results.append({
-                "face_id": face_id,
-                "gender_result": gender_result,
-                "face_detection_confidence": round(face["confidence"], 3)
-            })
-        except Exception as e:
-            logger.error(f"Error processing face {face_id}: {str(e)}")
-    
-    return {
-        "num_faces_processed": len(results),
-        "gender_results": results
-    }
+from logger import logger
+from gender_detection import process_faces
 
 def handle(req: bytes) -> bytes:
     try:

@@ -16,7 +16,14 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
+
 COPY handler.py .
+COPY config.py .
+COPY model_loader.py .
+COPY image_processing.py .
+COPY emotion_detection.py .
+COPY logger.py .
+
 COPY emotion-ferplus-8.onnx .
 
 RUN apt-get update && \

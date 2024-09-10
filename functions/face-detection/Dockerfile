@@ -17,6 +17,12 @@ COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
 COPY handler.py .
+COPY config.py .
+COPY model_loader.py .
+COPY image_processing.py .
+COPY face_detection.py .
+COPY logger.py .
+COPY utils.py .
 COPY version-RFB-320.onnx .
 
 RUN apt-get update && \

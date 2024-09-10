@@ -17,6 +17,12 @@ COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
 COPY handler.py .
+COPY config.py .
+COPY model_loader.py .
+COPY image_processing.py .
+COPY gender_detection.py .
+COPY logger.py .
+
 COPY gender_googlenet.caffemodel .
 COPY gender_googlenet.prototxt .
 

@@ -10,3 +10,4 @@ functions/*/tokenizer/
 *.caffemodel
 __pycache__
 functions/*/*.jpg
+functions/*/*.jpeg
