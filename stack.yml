@@ -81,7 +81,6 @@ functions:
       FACE_DETECTION_FUNCTION: "face-detection"
       GENDER_DETECTION_FUNCTION: "face-gender-detection"
       EMOTION_DETECTION_FUNCTION: "face-emotion-detection"
-      RESULT_COMBINER_FUNCTION: "result-combiner"
       REDIS_HOST: "redis-master.openfaas.svc.cluster.local"
       REDIS_PORT: "6379"
       REDIS_DB: "0"

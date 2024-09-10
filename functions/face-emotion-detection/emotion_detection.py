@@ -3,6 +3,7 @@ from typing import Dict, Any
 from config import EMOTION_TABLE
 from model_loader import emotion_model
 from image_processing import preprocess
+from logger import logger
 
 def softmax(scores):
     exp = np.exp(scores - np.max(scores))

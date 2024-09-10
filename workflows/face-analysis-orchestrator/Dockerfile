@@ -22,7 +22,6 @@ COPY logger.py .
 COPY workflow.py .
 COPY cache.py .
 COPY image_processing.py .
-COPY metrics.py .
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libgomp1 libglib2.0-0 && \
