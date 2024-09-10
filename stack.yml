@@ -2,46 +2,8 @@ version: 1.0
 provider:
   name: openfaas
   gateway: http://127.0.0.1:8080
+
 functions:
-  sentiment-analysis:
-    lang: dockerfile
-    handler: ./functions/sentiment-analysis
-    image: davidandw190/sentiment-analysis:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  multi-label-sentiment-analysis:
-    lang: dockerfile
-    handler: ./functions/multi-label-sentiment-analysis
-    image: davidandw190/multi-label-sentiment-analysis:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
-  text-classification:
-    lang: dockerfile
-    handler: ./functions/text-classification
-    image: davidandw190/text-classification:v1
-    environment:
-      write_debug: true
-      exec_timeout: '600s'
-      read_timeout: 120
-      write_timeout: 120
-    health_check:
-      initial_delay_seconds: 120
-      period_seconds: 3
-      failure_threshold: 5
   face-detection:
     lang: dockerfile
     handler: ./functions/face-detection
@@ -52,10 +14,17 @@ functions:
       read_timeout: 120
       write_timeout: 120
       RAW_BODY: true
+    annotations:
+      com.openfaas.scale.min: "2"
+      com.openfaas.scale.max: "10"
+      com.openfaas.scale.factor: "25%"
+      com.openfaas.scale.zero: "false"
+      com.openfaas.scale.target: "30"
     health_check:
       initial_delay_seconds: 120
       period_seconds: 3
       failure_threshold: 5
+
   face-emotion-detection:
     lang: dockerfile
     handler: ./functions/face-emotion-detection
@@ -66,10 +35,17 @@ functions:
       read_timeout: 120
       write_timeout: 120
       RAW_BODY: true
+    annotations:
+      com.openfaas.scale.min: "1"
+      com.openfaas.scale.max: "8"
+      com.openfaas.scale.factor: "25%"
+      com.openfaas.scale.zero: "false"
+      com.openfaas.scale.target: "35"
     health_check:
       initial_delay_seconds: 120
       period_seconds: 3
       failure_threshold: 5
+
   face-gender-detection:
     lang: dockerfile
     handler: ./functions/face-gender-detection
@@ -80,10 +56,17 @@ functions:
       read_timeout: 120
       write_timeout: 120
       RAW_BODY: true
+    annotations:
+      com.openfaas.scale.min: "1"
+      com.openfaas.scale.max: "8"
+      com.openfaas.scale.factor: "25%"
+      com.openfaas.scale.zero: "false"
+      com.openfaas.scale.target: "35"
     health_check:
       initial_delay_seconds: 120
       period_seconds: 3
       failure_threshold: 5
+
   face-analysis-orchestrator:
     lang: dockerfile
     handler: ./workflows/face-analysis-orchestrator
@@ -103,6 +86,72 @@ functions:
       REDIS_PORT: "6379"
       REDIS_DB: "0"
       REDIS_TTL: "300"
+    annotations:
+      com.openfaas.scale.min: "2"
+      com.openfaas.scale.max: "15"
+      com.openfaas.scale.factor: "30%"
+      com.openfaas.scale.zero: "false"
+      com.openfaas.scale.target: "25"
+    health_check:
+      initial_delay_seconds: 120
+      period_seconds: 3
+      failure_threshold: 5
+
+  sentiment-analysis:
+    lang: dockerfile
+    handler: ./functions/sentiment-analysis
+    image: davidandw190/sentiment-analysis:v1
+    environment:
+      write_debug: true
+      exec_timeout: '600s'
+      read_timeout: 120
+      write_timeout: 120
+    annotations:
+      com.openfaas.scale.min: "1"
+      com.openfaas.scale.max: "5"
+      com.openfaas.scale.factor: "20%"
+      com.openfaas.scale.zero: "true"
+      com.openfaas.scale.target: "50"
+    health_check:
+      initial_delay_seconds: 120
+      period_seconds: 3
+      failure_threshold: 5
+
+  multi-label-sentiment-analysis:
+    lang: dockerfile
+    handler: ./functions/multi-label-sentiment-analysis
+    image: davidandw190/multi-label-sentiment-analysis:v1
+    environment:
+      write_debug: true
+      exec_timeout: '600s'
+      read_timeout: 120
+      write_timeout: 120
+    annotations:
+      com.openfaas.scale.min: "1"
+      com.openfaas.scale.max: "5"
+      com.openfaas.scale.factor: "20%"
+      com.openfaas.scale.zero: "true"
+      com.openfaas.scale.target: "40"
+    health_check:
+      initial_delay_seconds: 120
+      period_seconds: 3
+      failure_threshold: 5
+
+  text-classification:
+    lang: dockerfile
+    handler: ./functions/text-classification
+    image: davidandw190/text-classification:v1
+    environment:
+      write_debug: true
+      exec_timeout: '600s'
+      read_timeout: 120
+      write_timeout: 120
+    annotations:
+      com.openfaas.scale.min: "1"
+      com.openfaas.scale.max: "5"
+      com.openfaas.scale.factor: "20%"
+      com.openfaas.scale.zero: "true"
+      com.openfaas.scale.target: "45"
     health_check:
       initial_delay_seconds: 120
       period_seconds: 3
