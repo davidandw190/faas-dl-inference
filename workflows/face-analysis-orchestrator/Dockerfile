@@ -28,9 +28,9 @@ ENV fprocess="python3 handler.py" \
     upstream_url=${UPSTREAM_URL} \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    exec_timeout="30s" \
-    write_timeout="15s" \
-    read_timeout="15s"
+    exec_timeout="60s" \
+    write_timeout="30s" \
+    read_timeout="30s"
 
 HEALTHCHECK --interval=5s --timeout=10s --retries=3 CMD [ -e /tmp/.lock ] || exit 1
 
