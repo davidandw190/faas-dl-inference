@@ -1,20 +1,24 @@
 import json
 import sys
+import asyncio
 from logger import logger
 from workflow import face_analysis_workflow
 
-def handle(req: bytes) -> bytes:
+async def handle_async(req: bytes) -> bytes:
     try:
         if not req:
             return json.dumps({"error": "Empty request"}).encode('utf-8')
         
-        result = face_analysis_workflow(req)
+        result = await face_analysis_workflow(req)
         
         return json.dumps(result).encode('utf-8')
     
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         return json.dumps({"error": f"An unexpected error occurred: {str(e)}"}).encode('utf-8')
+
+def handle(req: bytes) -> bytes:
+    return asyncio.run(handle_async(req))
 
 if __name__ == "__main__":
     try:
